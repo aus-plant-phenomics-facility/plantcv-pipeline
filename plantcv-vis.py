@@ -6,11 +6,6 @@ import argparse
 import string
 from plantcv import plantcv as pcv
 
-
-# python plantcv-vis.py -i 0438_PH_UA_Garnett_Wheat/0438\ NUE_068695-H_2018-07-04_02-25-01_4551801/RGB_3D_3D_side_far_0/0_0_0.png -o 0438_output -r 068695-H_2018-07-04.json -w
-
-
-
 ### Parse command-line arguments
 def options():
     parser = argparse.ArgumentParser(description="Imaging processing with opencv")
@@ -37,24 +32,21 @@ def main():
     # Read image
     img, path, filename = pcv.readimage(filename=args.image)
 
-    # Convert RGB to HSV and extract the saturation channel
+    # Convert RGB to HSV and extract the value channel
     s = pcv.rgb2gray_hsv(rgb_img=img, channel='v')
 
-    # Threshold the saturation image
+    # Threshold the saturation image removing highs and lows and join
     s_thresh_1 = pcv.threshold.binary(gray_img=s, threshold=10, max_value=255, object_type='light')
     s_thresh_2 = pcv.threshold.binary(gray_img=s, threshold=245, max_value=255, object_type='dark')
-
     s_thresh = pcv.logical_and(bin_img1=s_thresh_1, bin_img2=s_thresh_2)
 
     # Median Blur
     s_mblur = pcv.median_blur(gray_img=s_thresh, ksize=5)
-    #s_cnt = pcv.median_blur(gray_img=s_thresh, ksize=5)
 
     # Convert RGB to LAB and extract the Blue channel
     b = pcv.rgb2gray_lab(rgb_img=img, channel='b')
 
     # Threshold the blue image
-    #b_thresh = pcv.threshold.binary(gray_img=b, threshold=126, max_value=255, object_type='light')
     b_cnt = pcv.threshold.binary(gray_img=b, threshold=128, max_value=255, object_type='light')
 
     # Fill small objects
@@ -72,12 +64,10 @@ def main():
 
     # Threshold the green-magenta and blue images
     maskeda_thresh = pcv.threshold.binary(gray_img=masked_a, threshold=127, max_value=255, object_type='dark')
-    #maskeda_thresh1 = pcv.threshold.binary(gray_img=masked_a, threshold=128, max_value=0, object_type='dark')
     maskedb_thresh = pcv.threshold.binary(gray_img=masked_b, threshold=128, max_value=255, object_type='light')
 
     # Join the thresholded saturation and blue-yellow images (OR)
     ab = pcv.logical_or(bin_img1=maskeda_thresh, bin_img2=maskedb_thresh)
-    #ab = pcv.logical_or(bin_img1=maskeda_thresh1, bin_img2=ab1)
 
     # Fill small objects
     ab_fill = pcv.fill(bin_img=ab, size=200)
