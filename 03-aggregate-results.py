@@ -1,4 +1,4 @@
-# docker run -v "$PWD":/home/joyvan/pcv -v "$HOME"/.ssh/:/home/joyvan/.ssh 6d2ca9b5f7e2 python /home/joyvan/pcv/02-analyse-image.py
+# docker run -v "$PWD":/home/joyvan/pcv -v "$HOME"/.ssh/:/home/joyvan/.ssh 6d2ca9b5f7e2 python /home/joyvan/pcv/03-aggregate-results.py
 
 from plantcv import utils as pcv_utils
 from plantcv import parallel as pcv_parallel
