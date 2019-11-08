@@ -1,4 +1,4 @@
-# docker run -v "$PWD":/home/joyvan/pcv -v "$HOME"/.ssh/:/home/joyvan/.ssh 6d2ca9b5f7e2 python /home/joyvan/pcv/02-analyse-image.py 1
+# docker run -v "$PWD":/home/joyvan/pcv -v "$HOME"/.ssh/:/home/joyvan/.ssh appf/plantcv python /home/joyvan/pcv/02-analyse-image.py 1
 
 import cv2
 import numpy as np
