@@ -1,4 +1,8 @@
+#!/usr/bin/env python
 # docker run -v "$PWD":/home/joyvan/pcv -v "$HOME"/.ssh/:/home/joyvan/.ssh appf/plantcv python /home/joyvan/pcv/01-query-snapshots.py
+
+from distutils.sysconfig import get_python_lib
+print(get_python_lib())
 
 import psycopg2
 import psycopg2.extras
@@ -50,8 +54,10 @@ WHERE
    AND snapshot.measurement_label = '0467 Barley' 
    AND camera_label like '%RGB%'
 ORDER BY
-   "Plant ID",
-   time_stamp
+   camera_label,
+   time_stamp desc,
+   "Plant ID"
+LIMIT 100
 """.format(measurement_label=measurement_label))
 
 results = cur.fetchall()
