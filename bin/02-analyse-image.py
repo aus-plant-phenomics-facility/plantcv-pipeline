@@ -1,4 +1,4 @@
-# docker run -v "$PWD":/home/joyvan/pcv -v "$HOME"/.ssh/:/home/joyvan/.ssh appf/plantcv python /home/joyvan/pcv/02-analyse-image.py 1
+#!/usr/bin/env python
 
 import cv2
 import numpy as np
@@ -7,39 +7,35 @@ from plantcv import plantcv as pcv
 import json
 import argparse
 
-with open ("/home/joyvan/pcv/0467-jobs.json", 'r', encoding='utf-8') as f:
-  results = json.load(f)
-
 parser = argparse.ArgumentParser(description='Analyse a job.')
-parser.add_argument('index', metavar='index', type=int,
-                    help='index within jobs file')
+parser.add_argument('job_file', metavar='job_file', type=str,
+                    help='json job file')
+parser.add_argument('image_server', metavar='image_server', type=str,
+                    help='.')
+parser.add_argument('image_user', metavar='image_user', type=str,
+                    help='.')
+parser.add_argument('image_pkey', metavar='image_pkey', type=str,
+                    help='.')
+parser.add_argument('image_base_dir', metavar='image_base_dir', type=str,
+                    help='.')
+
 
 args = parser.parse_args()
-result = results[args.index]
 
-
-image_server = '146.118.66.62'
-image_user = 'ubuntu'
-image_pkey = '/home/joyvan/.ssh/id_rsa'
-
-db_name = '0000_Production_N'
-
-#result = json.loads("""
-#{"Plant ID": "073242-W", "Genotype ID": "BW827", "Watering Regime": "Well watered", "Replicate": "1", "Smarthouse": "NE", "Lane": "1", "Position": "5", "Time": "2019-03-16T22:33:39.686+00:00", "Time After Planting": 66.0, "Water Amount": 44, "Weight After": 4752.0, "Weight Before": 4707.0, "camera_label": "RGB_3D_3D_side_far_5", "path": "2019-03-17/blob144448"}
-#""")
-
+with open (args.job_file, 'r', encoding='utf-8') as f:
+  result = json.load(f)
 
 
 path = result['path']
 camera_label = result['camera_label']
 
-filename = "/home/joyvan/pcv/0467-results/result_{}_{}_{}.json".format(result['Plant ID'],result['camera_label'],result['Time'])
+filename = "result_{}_{}_{}.json".format(result['Plant ID'],result['camera_label'],result['Time'])
 
 # # Load image via SFTP
 
-mykey = paramiko.RSAKey.from_private_key_file(image_pkey)
-server = image_server
-sshuser = image_user
+mykey = paramiko.RSAKey.from_private_key_file(args.image_pkey)
+server = args.image_server
+sshuser = args.image_user
 
 client = paramiko.SSHClient()
 #client.load_system_host_keys()
@@ -50,7 +46,7 @@ client.get_transport().window_size = 3 * 1024 * 1024
 pcv.params.debug = 'none'
 
 sftp = client.open_sftp()
-with sftp.open('/plantdb/ftp-2019/{dbname}/{path}'.format(dbname=db_name,path=path)) as f:
+with sftp.open('{image_base_dir}/{path}'.format(image_base_dir=args.image_base_dir,path=path)) as f:
 
   file_size = f.stat().st_size
   f.prefetch(file_size)
@@ -168,11 +164,11 @@ if obj is not None:
   # Pseudocolor the grayscale image
   #pseudocolored_img = pcv.visualize.pseudocolor(gray_img=s, mask=kept_mask, cmap='jet')
 
-  for key in result.keys():
-    if str(result[key]).isdigit():
-      pcv.outputs.add_observation(variable=key, trait=key, method='', scale='', datatype=int, value=result[key], label='')
-    else:
-      pcv.outputs.add_observation(variable=key, trait=key, method='', scale='', datatype=str, value=result[key], label='')
+for key in result.keys():
+  if str(result[key]).isdigit():
+    pcv.outputs.add_observation(variable=key, trait=key, method='', scale='', datatype=int, value=result[key], label='')
+  else:
+    pcv.outputs.add_observation(variable=key, trait=key, method='', scale='', datatype=str, value=result[key], label='')
 
   # Write shape and color data to results file
-  pcv.print_results(filename=filename)
+pcv.print_results(filename=filename)

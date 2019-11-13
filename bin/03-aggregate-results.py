@@ -1,12 +1,12 @@
-# docker run -v "$PWD":/home/joyvan/pcv -v "$HOME"/.ssh/:/home/joyvan/.ssh appf/plantcv python /home/joyvan/pcv/03-aggregate-results.py
+#!/usr/bin/env python
 
 from plantcv import utils as pcv_utils
 from plantcv import parallel as pcv_parallel
 
-results_dir = "/home/joyvan/pcv/0467-results/"
+results_dir = "."
 
-json_file = "/home/joyvan/pcv/merged.json"
-csv_file = "/home/joyvan/pcv/merged"
+json_file = "merged.json"
+csv_file = "merged"
 
 
 # TODO: do I need to delete the file first?

@@ -1,28 +1,36 @@
 #!/usr/bin/env python
-# docker run -v "$PWD":/home/joyvan/pcv -v "$HOME"/.ssh/:/home/joyvan/.ssh appf/plantcv python /home/joyvan/pcv/01-query-snapshots.py
-
-from distutils.sysconfig import get_python_lib
-print(get_python_lib())
 
 import psycopg2
 import psycopg2.extras
 import json
+import argparse
 
-db_server = '146.118.66.62'
-db_user = 'readonlyuser'
-db_password = 'readonlyuser'
+parser = argparse.ArgumentParser(description='Query Snapshots.')
+parser.add_argument('db_server', metavar='db_server', type=str,
+                    help='.')
+parser.add_argument('db_name', metavar='db_name', type=str,
+                    help='.')
+parser.add_argument('db_user', metavar='db_user', type=str,
+                    help='.')
+parser.add_argument('db_password', metavar='db_password', type=str,
+                    help='.')
+parser.add_argument('measurement_label', metavar='measurement_label', type=str,
+                    help='.')
+parser.add_argument('--limit', metavar='limit', type=int,
+                    help='.')
 
-db_name = '0000_Production_N'
-measurement_label = '0467 Barley'
+
+
+args = parser.parse_args()
 
 # Connect to an existing database
-conn = psycopg2.connect(host=db_server, dbname=db_name, user=db_user, password=db_password)
+conn = psycopg2.connect(host=args.db_server, dbname=args.db_name, user=args.db_user, password=args.db_password)
 
 # Open a cursor to perform database operations
 cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
 # Query the database and obtain data as Python objects
-cur.execute("""
+query = """
 SELECT
    snapshot.id_tag AS "Plant ID",
    metadata_view."Genotype ID",
@@ -31,7 +39,7 @@ SELECT
    metadata_view."Smarthouse",
    metadata_view."Lane",
    metadata_view."Position",
-   trim(both '"' from to_json(time_stamp)::text) as "Time",
+   to_char(time_stamp,'YYYYmmddThhMMSS') as "Time",
    DATE_PART('day', snapshot.time_stamp - '2019-01-09') as "Time After Planting",
    snapshot.water_amount AS "Water Amount",
    snapshot.weight_after AS "Weight After",
@@ -51,14 +59,18 @@ FROM
          ON tile.image_oid = image_file_table.id    
 WHERE
    snapshot.id_tag ~ '^\d+ ?' 
-   AND snapshot.measurement_label = '0467 Barley' 
+   AND snapshot.measurement_label = '{measurement_label}'
    AND camera_label like '%RGB%'
 ORDER BY
    camera_label,
    time_stamp desc,
    "Plant ID"
-LIMIT 100
-""".format(measurement_label=measurement_label))
+""".format(measurement_label=args.measurement_label)
+
+if (args.limit):
+  query = query + " LIMIT {limit}".format(limit=args.limit)
+
+cur.execute(query)
 
 results = cur.fetchall()
 
@@ -69,6 +81,6 @@ conn.close()
 #print(len(results))
 #print(json.dumps(results[i]))
 
-#for result in results:
-with open("/home/joyvan/pcv/0467-jobs.json", 'w', encoding='utf-8') as f:
-  json.dump(results, f, ensure_ascii=False, indent=4)
+for result in results:
+  with open("job_{}_{}_{}.json".format(result['Plant ID'],result['camera_label'],result['Time']), 'w', encoding='utf-8') as f:
+    json.dump(result, f, ensure_ascii=False, indent=4)
