@@ -45,9 +45,17 @@ process fetch_image {
 		set val(job_file.baseName), file(job_file), file("input_image.png") into input_image_ch
 
 	script:
-	"""
-	02a-fetch-image.py $job_file $params.image_server $params.image_user $image_pkey $params.image_base_dir$params.database
-	"""
+	  if( params.image_access_method == 'sftp' )
+		"""
+		02a-fetch-image.py $job_file $params.image_server $params.image_user $image_pkey $params.image_base_dir$params.database
+		"""
+	else ( params.image_access_method == 'local' )
+		"""
+		02ax-symlink-image.py $job_file $params.image_base_dir$params.database
+		"""
+	
+
+
 }
 
 process analyse_image {
