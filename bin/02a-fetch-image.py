@@ -29,8 +29,6 @@ with open (args.job_file, 'r', encoding='utf-8') as f:
 path = result['path']
 camera_label = result['camera_label']
 
-filename = "result_{}_{}_{}.json".format(result['Plant ID'],result['camera_label'],result['Time'])
-
 # # Load image via SFTP
 
 mykey = paramiko.RSAKey.from_private_key_file(args.image_pkey)
