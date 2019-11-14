@@ -48,3 +48,14 @@ pcv.params.debug = 'none'
 sftp = client.open_sftp()
 
 sftp.get('{image_base_dir}/{path}'.format(image_base_dir=args.image_base_dir,path=path),'input_image.png')
+
+# Read image
+img, path, filename = pcv.readimage(filename='input_image.png')
+
+#print(type(img))
+
+# check image not blank
+if np.count_nonzero(img) == 0:
+    exit(15)
+else:
+    pass
