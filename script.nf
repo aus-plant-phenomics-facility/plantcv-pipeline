@@ -29,7 +29,7 @@ process fetch_image {
 process analyse_image {
 
     input:
-    	file "input_image.png" from input_image_ch
+        file "input_image.png" from input_image_ch
 	    file job_file from jobs_ch.flatten()
 
 	output:
@@ -45,6 +45,8 @@ process analyse_image {
 }
 
 process aggregate_results {
+
+	publishDir 'results'
 	
 	input:
 		file results from results_ch.collect()
