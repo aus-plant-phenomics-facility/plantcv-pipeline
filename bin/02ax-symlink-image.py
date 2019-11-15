@@ -28,7 +28,8 @@ os.symlink('{image_base_dir}/{path}'.format(image_base_dir=args.image_base_dir,p
 
 # Read image
 img, path, filename = pcv.readimage(filename='input_image.png')
-
+#img = cv2.imread('input_image.png')
+#print(img)
 #print(type(img))
 
 # check image not blank

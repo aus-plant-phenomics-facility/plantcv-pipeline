@@ -1,6 +1,6 @@
 process query_snapshots {
 	input:
-		file query_file from file("$params.query_file")
+		file query_file from file(params.query_file)
 
     output:
         file "job*.json" into jobs_ch
@@ -68,8 +68,13 @@ process analyse_image {
 		file "*.png" optional true
 	
 	script:
+	if (params.write_image == 'true')
 	"""
 		02b-analyse-image.py -i $image_file -m $job_file -o "." -r "result_${job_file.baseName}.json" -w -D '$params.debug'
+	"""
+	else
+	"""
+		02b-analyse-image.py -i $image_file -m $job_file -o "." -r "result_${job_file.baseName}.json" -D '$params.debug'
 	"""
 
 	
