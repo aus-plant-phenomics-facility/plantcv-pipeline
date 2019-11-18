@@ -32,7 +32,7 @@ with open(args.query_file, 'r') as file:
 	query = file.read()
 	query = query.format(measurement_label=args.measurement_label)
 
-if (args.limit):
+if (args.limit > 0):
 	query = query + " LIMIT {limit}".format(limit=args.limit)
 
 cur.execute(query)

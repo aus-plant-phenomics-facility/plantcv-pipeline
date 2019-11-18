@@ -18,9 +18,8 @@ args = parser.parse_args()
 with open (args.job_file, 'r', encoding='utf-8') as f:
 	job = json.load(f)
 
-os.symlink('{image_base_dir}/{path}'.format(image_base_dir=args.image_base_dir,path=job['path']),'input_image.png')
+os.symlink('{full_image_path}'.format(full_image_path=os.path.join(args.image_base_dir,job['path'])),'input_image.png')
 
-# Read image
 img, path, filename = pcv.readimage(filename='input_image.png')
 
 # if image is blank, error with specific code.

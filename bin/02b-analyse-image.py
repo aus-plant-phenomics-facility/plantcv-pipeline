@@ -154,7 +154,7 @@ def main():
 		#print(pcv.outputs.images)
 		if args.writeimg == True:
 			for idx,item in enumerate(pcv.outputs.images[0]):
-				pcv.print_image(item, "{}.png".format(idx))
+				pcv.print_image(item, "{}_{}.png".format(args.result[:-5],idx))
 
 	# Write shape and color data to results file
 	pcv.print_results(filename=args.result)

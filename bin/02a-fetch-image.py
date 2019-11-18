@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import cv2
 import numpy as np
-import paramiko
 from plantcv import plantcv as pcv
 import json
 import argparse
+import os
+import paramiko
 
 parser = argparse.ArgumentParser(description='Analyse a job.')
 parser.add_argument('job_file', metavar='job_file', type=str,
@@ -23,8 +23,7 @@ parser.add_argument('image_base_dir', metavar='image_base_dir', type=str,
 args = parser.parse_args()
 
 with open (args.job_file, 'r', encoding='utf-8') as f:
-	result = json.load(f)
-
+	job = json.load(f)
 
 ssh_key = paramiko.RSAKey.from_private_key_file(args.image_pkey)
 ssh_server = args.image_server
@@ -37,7 +36,7 @@ client.connect(ssh_server, username = ssh_user, pkey = ssh_key)
 client.get_transport().window_size = 3 * 1024 * 1024
 
 sftp = client.open_sftp()
-sftp.get('{image_base_dir}/{path}'.format(image_base_dir=args.image_base_dir,path=path),'input_image.png')
+sftp.get('{full_image_path}'.format(full_image_path=os.path.join(args.image_base_dir,job['path'])),'input_image.png')
 
 img, path, filename = pcv.readimage(filename='input_image.png')
 
