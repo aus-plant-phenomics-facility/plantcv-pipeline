@@ -82,7 +82,7 @@ process analyse_image {
 }
 
 process aggregate_results {
-
+	beforeScript 'ulimit -Ss unlimited'
 	publishDir 'results', mode: 'copy'
 	
 	input:
